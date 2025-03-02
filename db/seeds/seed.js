@@ -81,6 +81,7 @@ const seed = ({ topicData, userData, articleData, commentData }) => {
       //seed articles
       const formattedArticles = articleData.map((articles) => {
         const createdJS = utils.convertTimestampToDate(articles);
+
         return [
           articles.title,
           articles.topic,
@@ -98,11 +99,14 @@ const seed = ({ topicData, userData, articleData, commentData }) => {
       );
       return db.query(sqlString);
     })
-    .then((check) => {
+    .then((passedArticles) => {
       //seed comments
-      const formattedComments = commentData.map(function (comment) {
+      const formattedComments = commentData.map((comment) => {
         const createdJS = utils.convertTimestampToDate(comment);
-        let articleId = utils.getArticleId(check.rows, comment.article_title);
+        let articleId = utils.getArticleId(
+          passedArticles.rows,
+          comment.article_title
+        );
 
         return [
           articleId,
