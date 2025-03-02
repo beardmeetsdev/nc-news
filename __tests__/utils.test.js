@@ -1,6 +1,4 @@
-const {
-  convertTimestampToDate
-} = require("../db/seeds/utils");
+const { convertTimestampToDate, getArticleId } = require("../db/seeds/utils");
 
 describe("convertTimestampToDate", () => {
   test("returns a new object", () => {
@@ -38,3 +36,23 @@ describe("convertTimestampToDate", () => {
   });
 });
 
+describe("getArticleId", () => {
+  test("returns correct article_id when given title", () => {
+    const articles = [
+      { article_id: 8, title: "Living in the shadow of a great man" },
+    ];
+    const result = getArticleId(
+      articles,
+      "Living in the shadow of a great man"
+    );
+    expect(result).toBe(8);
+  });
+
+  test("returns null when the title does not exist", () => {
+    const articles = [
+      { article_id: 8, title: "Living in the shadow of a great man" },
+    ];
+    const result = getArticleId(articles, "Lord of the Rings");
+    expect(result).toBeNull();
+  });
+});
