@@ -1,4 +1,5 @@
 const db = require("../db/connection");
+const { checkExists } = require("../db/seeds/utils");
 
 const selectTopics = () => {
   return db.query(`SELECT description, slug FROM topics`).then(({ rows }) => {
@@ -23,38 +24,41 @@ const selectArticleById = (id) => {
 const selectArticles = () => {
   return db
     .query(
-      `SELECT author, title, article_id, topic, created_at, votes, article_img_url FROM articles ORDER BY created_at DESC`
+      `SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url, 
+        CAST(COUNT(comments.comment_id) AS INT) AS comment_count 
+        FROM articles  
+        LEFT JOIN comments ON articles.article_id = comments.article_id
+        GROUP BY articles.article_id
+        ORDER BY articles.created_at DESC`
     )
     .then(({ rows }) => {
-      const returnArray = rows.map((row) => {
-        return db
-          .query(`SELECT COUNT(*) FROM comments WHERE article_id = $1`, [
-            row.article_id,
-          ])
-          .then(({ rows }) => {
-            row.comment_count = Number(rows[0].count);
-            return row;
-          });
-      });
-
-      return Promise.all(returnArray);
+      return rows;
     });
 };
 
 const selectArticleComments = (id) => {
+  return checkExists("articles", "article_id", id)
+    .then(() => {
+      return db.query(
+        `SELECT * FROM comments WHERE article_id = $1 ORDER BY created_at DESC`,
+        [id]
+      );
+    })
+    .then(({ rows }) => {
+      return rows;
+    });
+};
+
+const insertCommentFromId = (username, body, id) => {
   return db
     .query(
-      `SELECT * FROM comments WHERE article_id = $1 ORDER BY created_at DESC`,
-      [id]
+      `INSERT INTO comments (article_id, body, author)
+        VALUES ($1, $2, $3)
+        RETURNING *`,
+      [id, body, username]
     )
     .then(({ rows }) => {
-      if (rows.length === 0) {
-        return Promise.reject({
-          status: 404,
-          msg: `No comments found for article: ${id}`,
-        });
-      }
-      return rows;
+      return rows[0];
     });
 };
 
@@ -63,4 +67,5 @@ module.exports = {
   selectArticleById,
   selectArticles,
   selectArticleComments,
+  insertCommentFromId,
 };
