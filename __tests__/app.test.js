@@ -116,3 +116,44 @@ describe("GET: /api/articles", () => {
       });
   });
 });
+
+describe("GET: /api/articles/:id/comments", () => {
+  test("200: responds with an array of comments from the given article ID", () => {
+    return request(app)
+      .get("/api/articles/5/comments")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.article.length).toBe(2);
+        expect(body.article[0]).toHaveProperty("comment_id");
+        expect(body.article[0]).toHaveProperty("votes");
+        expect(body.article[0]).toHaveProperty("created_at");
+        expect(body.article[0]).toHaveProperty("author");
+        expect(body.article[0]).toHaveProperty("body");
+        expect(body.article[0]).toHaveProperty("article_id");
+      });
+  });
+  test("404: trying to get an article comment which does not exist (article_id too high)", () => {
+    return request(app)
+      .get("/api/articles/99/comments")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("No comments found for article: 99");
+      });
+  });
+  test("404: trying to get an article comment which does not exist (no comments made for article)", () => {
+    return request(app)
+      .get("/api/articles/2/comments")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("No comments found for article: 2");
+      });
+  });
+  test("400: responds when given a bad request", () => {
+    return request(app)
+      .get("/api/articles/seal/comments")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Invalid input");
+      });
+  });
+});
