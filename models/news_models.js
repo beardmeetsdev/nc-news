@@ -20,4 +20,25 @@ const selectArticleById = (article_id) => {
     });
 };
 
-module.exports = { selectTopics, selectArticleById };
+const selectArticles = () => {
+  return db
+    .query(
+      `SELECT author, title, article_id, topic, created_at, votes, article_img_url FROM articles ORDER BY created_at DESC`
+    )
+    .then(({ rows }) => {
+      const returnArray = rows.map((row) => {
+        return db
+          .query(`SELECT COUNT(*) FROM comments WHERE article_id = $1`, [
+            row.article_id,
+          ])
+          .then(({ rows }) => {
+            row.comment_count = Number(rows[0].count);
+            return row;
+          });
+      });
+
+      return Promise.all(returnArray);
+    });
+};
+
+module.exports = { selectTopics, selectArticleById, selectArticles };
