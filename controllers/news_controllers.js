@@ -3,6 +3,7 @@ const {
   selectTopics,
   selectArticleById,
   selectArticles,
+  selectArticleComments,
 } = require("../models/news_models");
 
 const getApi = (request, response) => {
@@ -26,10 +27,27 @@ const getArticleById = (request, response, next) => {
     });
 };
 
+const getArticleComments = (request, response, next) => {
+  const { article_id } = request.params;
+  selectArticleComments(article_id)
+    .then((article) => {
+      response.status(200).send({ article });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
 const getArticles = (request, response) => {
   selectArticles().then((articles) => {
     response.status(200).send({ articles });
   });
 };
 
-module.exports = { getApi, getTopics, getArticleById, getArticles };
+module.exports = {
+  getApi,
+  getTopics,
+  getArticleById,
+  getArticles,
+  getArticleComments,
+};

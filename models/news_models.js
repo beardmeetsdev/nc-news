@@ -6,14 +6,14 @@ const selectTopics = () => {
   });
 };
 
-const selectArticleById = (article_id) => {
+const selectArticleById = (id) => {
   return db
-    .query(`SELECT * FROM articles WHERE article_id = $1`, [article_id])
+    .query(`SELECT * FROM articles WHERE article_id = $1`, [id])
     .then(({ rows }) => {
       if (rows.length === 0) {
         return Promise.reject({
           status: 404,
-          msg: `Article not found: ${article_id}`,
+          msg: `Article not found: ${id}`,
         });
       }
       return rows;
@@ -41,4 +41,26 @@ const selectArticles = () => {
     });
 };
 
-module.exports = { selectTopics, selectArticleById, selectArticles };
+const selectArticleComments = (id) => {
+  return db
+    .query(
+      `SELECT * FROM comments WHERE article_id = $1 ORDER BY created_at DESC`,
+      [id]
+    )
+    .then(({ rows }) => {
+      if (rows.length === 0) {
+        return Promise.reject({
+          status: 404,
+          msg: `No comments found for article: ${id}`,
+        });
+      }
+      return rows;
+    });
+};
+
+module.exports = {
+  selectTopics,
+  selectArticleById,
+  selectArticles,
+  selectArticleComments,
+};
