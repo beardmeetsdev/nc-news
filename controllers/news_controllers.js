@@ -1,8 +1,14 @@
 const endpoints = require("../endpoints.json");
+const { selectTopics } = require("../models/news_models");
 
 const getApi = (request, response) => {
-  console.log(endpoints);
   response.status(200).send({ endpoints });
 };
 
-module.exports = { getApi };
+const getTopics = (request, response) => {
+  selectTopics().then((topics) => {
+    response.status(200).send({ topics });
+  });
+};
+
+module.exports = { getApi, getTopics };
