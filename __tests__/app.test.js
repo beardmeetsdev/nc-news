@@ -6,7 +6,7 @@ const app = require("../app.js");
 // const db = require("../db/connection");
 // const seed = require("../db/seeding/seed");
 // const data = require("../db/data/test-data");
-
+// to git pull
 /* Set up your beforeEach & afterAll functions here */
 // beforeEach(() => {
 //   return seed(data);
