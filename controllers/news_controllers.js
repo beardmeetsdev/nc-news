@@ -4,6 +4,7 @@ const {
   selectArticleById,
   selectArticles,
   selectArticleComments,
+  insertCommentFromId,
 } = require("../models/news_models");
 
 const getApi = (request, response) => {
@@ -44,10 +45,31 @@ const getArticles = (request, response) => {
   });
 };
 
+const postArticleComment = (request, response, next) => {
+  const { username, body } = request.body;
+  const { article_id } = request.params;
+
+  if (!username || !body || !article_id) {
+    return next({
+      status: 400,
+      msg: "Missing fields",
+    });
+  }
+
+  insertCommentFromId(username, body, article_id)
+    .then((rows) => {
+      response.status(201).send({ comment: rows });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
 module.exports = {
   getApi,
   getTopics,
   getArticleById,
   getArticles,
   getArticleComments,
+  postArticleComment,
 };
