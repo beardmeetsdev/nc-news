@@ -75,7 +75,7 @@ describe("GET: /api/articles/:id", () => {
       .get("/api/articles/99")
       .expect(404)
       .then(({ body }) => {
-        expect(body.msg).toBe("Article not found: 99");
+        expect(body.msg).toBe("Resource not found with value: 99");
       });
   });
   test("400: responds when given a bad request", () => {
@@ -171,6 +171,20 @@ describe("POST /api/articles/:article_id/comments", () => {
       .expect(201)
       .then(({ body }) => {
         expect(typeof body.comment).toBe("object");
+      });
+  });
+  test("400: Checks all fields are available", () => {
+    const comment = {
+      username: "butter_bridge",
+      body: null,
+    };
+
+    return request(app)
+      .post("/api/articles/3/comments")
+      .send(comment)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Missing fields");
       });
   });
 });

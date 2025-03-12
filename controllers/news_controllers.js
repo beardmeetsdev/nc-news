@@ -45,13 +45,24 @@ const getArticles = (request, response) => {
   });
 };
 
-const postArticleComments = (request, response, next) => {
+const postArticleComment = (request, response, next) => {
   const { username, body } = request.body;
   const { article_id } = request.params;
 
-  insertCommentFromId(username, body, article_id).then((rows) => {
-    response.status(201).send({ comment: rows });
-  });
+  if (!username || !body || !article_id) {
+    return next({
+      status: 400,
+      msg: "Missing fields",
+    });
+  }
+
+  insertCommentFromId(username, body, article_id)
+    .then((rows) => {
+      response.status(201).send({ comment: rows });
+    })
+    .catch((err) => {
+      next(err);
+    });
 };
 
 module.exports = {
@@ -60,5 +71,5 @@ module.exports = {
   getArticleById,
   getArticles,
   getArticleComments,
-  postArticleComments,
+  postArticleComment,
 };
