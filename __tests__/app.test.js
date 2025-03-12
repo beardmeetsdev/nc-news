@@ -75,7 +75,7 @@ describe("GET: /api/articles/:id", () => {
       .get("/api/articles/99")
       .expect(404)
       .then(({ body }) => {
-        expect(body.msg).toBe("Article not found: 99");
+        expect(body.msg).toBe("Resource not found with value: 99");
       });
   });
   test("400: responds when given a bad request", () => {
@@ -137,15 +137,15 @@ describe("GET: /api/articles/:id/comments", () => {
       .get("/api/articles/99/comments")
       .expect(404)
       .then(({ body }) => {
-        expect(body.msg).toBe("No comments found for article: 99");
+        expect(body.msg).toBe("Resource not found with value: 99");
       });
   });
-  test("404: trying to get an article comment which does not exist (no comments made for article)", () => {
+  test("200: article exists but has no comments", () => {
     return request(app)
       .get("/api/articles/2/comments")
-      .expect(404)
-      .then(({ body }) => {
-        expect(body.msg).toBe("No comments found for article: 2");
+      .expect(200)
+      .then(({ body: { article } }) => {
+        expect(article).toEqual([]);
       });
   });
   test("400: responds when given a bad request", () => {
@@ -154,6 +154,37 @@ describe("GET: /api/articles/:id/comments", () => {
       .expect(400)
       .then(({ body }) => {
         expect(body.msg).toBe("Invalid input");
+      });
+  });
+});
+
+describe("POST /api/articles/:article_id/comments", () => {
+  test("201: Adds a comment for a username and returns the posted comment", () => {
+    const comment = {
+      username: "butter_bridge",
+      body: "driving pug",
+    };
+
+    return request(app)
+      .post("/api/articles/3/comments")
+      .send(comment)
+      .expect(201)
+      .then(({ body }) => {
+        expect(typeof body.comment).toBe("object");
+      });
+  });
+  test("400: Checks all fields are available", () => {
+    const comment = {
+      username: "butter_bridge",
+      body: null,
+    };
+
+    return request(app)
+      .post("/api/articles/3/comments")
+      .send(comment)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Missing fields");
       });
   });
 });
