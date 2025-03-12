@@ -5,6 +5,7 @@ const {
   selectArticles,
   selectArticleComments,
   insertCommentFromId,
+  updateArticleVotes,
 } = require("../models/news_models");
 
 const getApi = (request, response) => {
@@ -21,7 +22,7 @@ const getArticleById = (request, response, next) => {
   const { article_id } = request.params;
   selectArticleById(article_id)
     .then((article) => {
-      response.status(200).send({ article });
+      response.status(200).send(article);
     })
     .catch((err) => {
       next(err);
@@ -49,16 +50,21 @@ const postArticleComment = (request, response, next) => {
   const { username, body } = request.body;
   const { article_id } = request.params;
 
-  if (!username || !body || !article_id) {
-    return next({
-      status: 400,
-      msg: "Missing fields",
-    });
-  }
-
   insertCommentFromId(username, body, article_id)
     .then((rows) => {
       response.status(201).send({ comment: rows });
+    })
+    .catch((err) => {
+      next(err);
+    });
+};
+
+const patchArticleById = (request, response, next) => {
+  const { article_id } = request.params;
+  const { inc_votes } = request.body;
+  updateArticleVotes(article_id, inc_votes)
+    .then((rows) => {
+      response.status(200).send(rows);
     })
     .catch((err) => {
       next(err);
@@ -72,4 +78,5 @@ module.exports = {
   getArticles,
   getArticleComments,
   postArticleComment,
+  patchArticleById,
 };

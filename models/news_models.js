@@ -13,7 +13,7 @@ const selectArticleById = (id) => {
       return db.query(`SELECT * FROM articles WHERE article_id = $1`, [id]);
     })
     .then(({ rows }) => {
-      return rows;
+      return rows[0];
     });
 };
 
@@ -58,10 +58,29 @@ const insertCommentFromId = (username, body, id) => {
     });
 };
 
+const updateArticleVotes = (article_id, inc_votes) => {
+  return checkExists("articles", "article_id", article_id).then(() => {
+    return db
+      .query(`SELECT votes FROM articles WHERE article_id = $1`, [article_id])
+      .then(({ rows }) => {
+        const newVotes = rows[0].votes + inc_votes;
+        return db
+          .query(
+            `UPDATE articles SET votes = $1 WHERE article_id = $2 RETURNING *`,
+            [newVotes, article_id]
+          )
+          .then(({ rows }) => {
+            return rows[0];
+          });
+      });
+  });
+};
+
 module.exports = {
   selectTopics,
   selectArticleById,
   selectArticles,
   selectArticleComments,
   insertCommentFromId,
+  updateArticleVotes,
 };

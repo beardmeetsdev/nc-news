@@ -48,26 +48,26 @@ describe("GET: /api/articles/:id", () => {
       .get("/api/articles/4")
       .expect(200)
       .then(({ body }) => {
-        expect(body.article[0].article_id).toBe(4);
-        expect(body.article[0].author).toBe("rogersop");
-        expect(body.article[0].title).toBe("Student SUES Mitch!");
-        expect(body.article[0].body).toBe(
+        expect(body.article_id).toBe(4);
+        expect(body.author).toBe("rogersop");
+        expect(body.title).toBe("Student SUES Mitch!");
+        expect(body.body).toBe(
           "We all love Mitch and his wonderful, unique typing style. However, the volume of his typing has ALLEGEDLY burst another students eardrums, and they are now suing for damages"
         );
-        expect(body.article[0].topic).toBe("mitch");
-        expect(body.article[0].created_at).toBe("2020-05-06T01:14:00.000Z");
-        expect(body.article[0].votes).toBe(0);
-        expect(body.article[0].article_img_url).toBe(
+        expect(body.topic).toBe("mitch");
+        expect(body.created_at).toBe("2020-05-06T01:14:00.000Z");
+        expect(body.votes).toBe(0);
+        expect(body.article_img_url).toBe(
           "https://images.pexels.com/photos/158651/news-newsletter-newspaper-information-158651.jpeg?w=700&h=700"
         );
-        expect(typeof body.article[0].article_id).toBe("number");
-        expect(typeof body.article[0].author).toBe("string");
-        expect(typeof body.article[0].title).toBe("string");
-        expect(typeof body.article[0].body).toBe("string");
-        expect(typeof body.article[0].topic).toBe("string");
-        expect(typeof body.article[0].created_at).toBe("string");
-        expect(typeof body.article[0].votes).toBe("number");
-        expect(typeof body.article[0].article_img_url).toBe("string");
+        expect(typeof body.article_id).toBe("number");
+        expect(typeof body.author).toBe("string");
+        expect(typeof body.title).toBe("string");
+        expect(typeof body.body).toBe("string");
+        expect(typeof body.topic).toBe("string");
+        expect(typeof body.created_at).toBe("string");
+        expect(typeof body.votes).toBe("number");
+        expect(typeof body.article_img_url).toBe("string");
       });
   });
   test("404: trying to get an article which does not exist (article_id too high)", () => {
@@ -83,7 +83,7 @@ describe("GET: /api/articles/:id", () => {
       .get("/api/articles/seal")
       .expect(400)
       .then(({ body }) => {
-        expect(body.msg).toBe("Invalid input");
+        expect(body.msg).toBe("Invalid DB input format");
       });
   });
 });
@@ -96,14 +96,6 @@ describe("GET: /api/articles", () => {
       .then(({ body: { articles } }) => {
         expect(articles.length).toBe(13);
         articles.forEach((article) => {
-          expect(article).toHaveProperty("author");
-          expect(article).toHaveProperty("title");
-          expect(article).toHaveProperty("article_id");
-          expect(article).toHaveProperty("topic");
-          expect(article).toHaveProperty("created_at");
-          expect(article).toHaveProperty("votes");
-          expect(article).toHaveProperty("article_img_url");
-          expect(article).toHaveProperty("comment_count");
           expect(typeof article.author).toBe("string");
           expect(typeof article.title).toBe("string");
           expect(typeof article.article_id).toBe("number");
@@ -153,7 +145,7 @@ describe("GET: /api/articles/:id/comments", () => {
       .get("/api/articles/seal/comments")
       .expect(400)
       .then(({ body }) => {
-        expect(body.msg).toBe("Invalid input");
+        expect(body.msg).toBe("Invalid DB input format");
       });
   });
 });
@@ -164,27 +156,87 @@ describe("POST /api/articles/:article_id/comments", () => {
       username: "butter_bridge",
       body: "driving pug",
     };
-
     return request(app)
       .post("/api/articles/3/comments")
       .send(comment)
       .expect(201)
       .then(({ body }) => {
-        expect(typeof body.comment).toBe("object");
+        const comment = body.comment;
+
+        expect(body).toHaveProperty("comment");
+        expect(comment).toHaveProperty("comment_id");
+        expect(comment).toHaveProperty("article_id");
+        expect(comment).toHaveProperty("body", "driving pug");
+        expect(comment).toHaveProperty("votes");
+        expect(comment).toHaveProperty("author", "butter_bridge");
+        expect(comment).toHaveProperty("created_at");
+        expect(typeof comment).toBe("object");
       });
   });
+
   test("400: Checks all fields are available", () => {
     const comment = {
       username: "butter_bridge",
       body: null,
     };
-
     return request(app)
       .post("/api/articles/3/comments")
       .send(comment)
       .expect(400)
       .then(({ body }) => {
-        expect(body.msg).toBe("Missing fields");
+        expect(body.msg).toBe("Violation of constraint: body cannot be NULL");
+      });
+  });
+});
+
+describe("PATCH /api/articles/:article_id", () => {
+  test("200: Amended the votes from an article", () => {
+    const votes = { inc_votes: 999 };
+
+    return request(app)
+      .patch("/api/articles/1")
+      .send(votes)
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.votes).toBe(1099);
+        expect(body).toHaveProperty("article_id");
+        expect(body).toHaveProperty("votes");
+      });
+  });
+
+  test("200: Amended the votes from an article when given a negative number", () => {
+    const votes = { inc_votes: -110 };
+
+    return request(app)
+      .patch("/api/articles/1")
+      .send(votes)
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.votes).toBe(-10);
+      });
+  });
+
+  test("404: Returns when votes are passed to be updated on an article that does not exist", () => {
+    const votes = { inc_votes: 50 };
+
+    return request(app)
+      .patch("/api/articles/3000")
+      .send(votes)
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Resource not found with value: 3000");
+      });
+  });
+
+  test("400: Returns when wrong format of votes is passed in", () => {
+    const votes = { inc_votes: "yes" };
+
+    return request(app)
+      .patch("/api/articles/1")
+      .send(votes)
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Invalid DB input format");
       });
   });
 });
