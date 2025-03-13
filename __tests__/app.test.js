@@ -240,3 +240,25 @@ describe("PATCH /api/articles/:article_id", () => {
       });
   });
 });
+
+describe("DELETE /api/comments/:comment_id", () => {
+  test("204: delete comment from given comment_id", () => {
+    return request(app).delete("/api/comments/3").expect(204);
+  });
+  test("400: Returns when wrong format of comment_id is sent", () => {
+    return request(app)
+      .delete("/api/comments/car")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Invalid DB input format");
+      });
+  });
+  test("404: Returns when comment_id passed to be deleted that does not exist", () => {
+    return request(app)
+      .delete("/api/comments/99")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Resource not found with value: 99");
+      });
+  });
+});
