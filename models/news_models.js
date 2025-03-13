@@ -76,6 +76,16 @@ const updateArticleVotes = (article_id, inc_votes) => {
   });
 };
 
+const deleteCommentById = (comment_id) => {
+  return checkExists("comments", "comment_id", comment_id).then(() => {
+    return db
+      .query(`DELETE FROM comments WHERE comment_id = $1 RETURNING *`, [
+        comment_id,
+      ])
+      .then(() => {});
+  });
+};
+
 module.exports = {
   selectTopics,
   selectArticleById,
@@ -83,4 +93,5 @@ module.exports = {
   selectArticleComments,
   insertCommentFromId,
   updateArticleVotes,
+  deleteCommentById,
 };
