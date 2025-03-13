@@ -10,7 +10,7 @@
     }
   },
   "GET /api/articles": {
-    "description": "serves an array of all article object, option to sort by table column asc/desc",
+    "description": "serves an array of all article object, option to sort by table column asc/desc, by topic",
     "queries": ["author", "topic", "sort_by", "order"],
     "exampleResponse": {
       "articles": [

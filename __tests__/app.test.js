@@ -130,6 +130,30 @@ describe("GET: /api/articles", () => {
         expect(body.msg).toBe("Table column does not exist");
       });
   });
+  test("200: Responds with all articles for a given topic", () => {
+    return request(app)
+      .get("/api/articles?topic=mitch")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(articles.length).toBe(12);
+      });
+  });
+  test("404: Responds when trying to get articles for a topic which does not exist (stephen)", () => {
+    return request(app)
+      .get("/api/articles?topic=stephen")
+      .expect(404)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Resource not found with value: stephen");
+      });
+  });
+  test("200: Responds when given multiple queries", () => {
+    return request(app)
+      .get("/api/articles?topic=cats&sort_by=votes&order=desc")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(articles.length).toBe(1);
+      });
+  });
 });
 
 describe("GET: /api/articles/:id/comments", () => {
