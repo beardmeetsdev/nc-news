@@ -17,21 +17,36 @@ const selectArticleById = (id) => {
     });
 };
 
-const selectArticles = (sort_by, order) => {
-  if (!order) {
-    order = "DESC";
-  }
+const selectArticles = (sort_by, order, topic) => {
   if (!sort_by) {
     sort_by = "created_at";
   }
+  if (!order) {
+    order = "DESC";
+  }
+
+  const queryValues = [];
+  let queryStr = `SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url, CAST(COUNT(comments.comment_id) AS INT) AS comment_count FROM articles LEFT JOIN comments ON articles.article_id = comments.article_id`;
+
+  if (topic) {
+    return checkExists("articles", "topic", topic).then(() => {
+      queryValues.push(topic);
+      queryStr += ` WHERE articles.topic = $1`;
+      return db
+        .query(
+          `${queryStr} GROUP BY articles.article_id ORDER BY articles.${sort_by} ${order}`,
+          queryValues
+        )
+        .then(({ rows }) => {
+          return rows;
+        });
+    });
+  }
+
   return db
     .query(
-      `SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url, 
-        CAST(COUNT(comments.comment_id) AS INT) AS comment_count 
-        FROM articles  
-        LEFT JOIN comments ON articles.article_id = comments.article_id
-        GROUP BY articles.article_id
-        ORDER BY articles.${sort_by} ${order}`
+      `${queryStr} GROUP BY articles.article_id ORDER BY articles.${sort_by} ${order}`,
+      queryValues
     )
     .then(({ rows }) => {
       return rows;
