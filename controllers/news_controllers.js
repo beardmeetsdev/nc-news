@@ -7,6 +7,7 @@ const {
   insertCommentFromId,
   updateArticleVotes,
   deleteCommentById,
+  selectUsers,
 } = require("../models/news_models");
 
 const getApi = (request, response) => {
@@ -84,6 +85,12 @@ const removeCommentById = (request, response, next) => {
     });
 };
 
+const getUsers = (request, response) => {
+  selectUsers().then((users) => {
+    response.status(200).send({ users });
+  });
+};
+
 module.exports = {
   getApi,
   getTopics,
@@ -93,4 +100,5 @@ module.exports = {
   postArticleComment,
   patchArticleById,
   removeCommentById,
+  getUsers,
 };
