@@ -42,10 +42,16 @@ const getArticleComments = (request, response, next) => {
     });
 };
 
-const getArticles = (request, response) => {
-  selectArticles().then((articles) => {
-    response.status(200).send({ articles });
-  });
+const getArticles = (request, response, next) => {
+  const { sort_by, order } = request.query;
+
+  selectArticles(sort_by, order)
+    .then((articles) => {
+      response.status(200).send({ articles });
+    })
+    .catch((err) => {
+      next(err);
+    });
 };
 
 const postArticleComment = (request, response, next) => {
