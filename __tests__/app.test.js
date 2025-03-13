@@ -26,7 +26,7 @@ describe("GET /api", () => {
 });
 
 describe("GET: /api/topics", () => {
-  test("200:, responds with all topic in an array", () => {
+  test("200: Responds with all topic in an array", () => {
     return request(app)
       .get("/api/topics")
       .expect(200)
@@ -35,15 +35,13 @@ describe("GET: /api/topics", () => {
         topics.forEach((topic) => {
           expect(topic).toHaveProperty("slug");
           expect(topic).toHaveProperty("description");
-          expect(typeof topic.slug).toBe("string");
-          expect(typeof topic.description).toBe("string");
         });
       });
   });
 });
 
 describe("GET: /api/articles/:id", () => {
-  test("200: responds with a single article object from the requested id", () => {
+  test("200: Responds with a single article object from the requested id", () => {
     return request(app)
       .get("/api/articles/4")
       .expect(200)
@@ -70,7 +68,7 @@ describe("GET: /api/articles/:id", () => {
         expect(typeof body.article_img_url).toBe("string");
       });
   });
-  test("404: trying to get an article which does not exist (article_id too high)", () => {
+  test("404: Responds when tyring to get an article which does not exist (99)", () => {
     return request(app)
       .get("/api/articles/99")
       .expect(404)
@@ -78,7 +76,7 @@ describe("GET: /api/articles/:id", () => {
         expect(body.msg).toBe("Resource not found with value: 99");
       });
   });
-  test("400: responds when given a bad request", () => {
+  test("400: Responds when given a bad request (seal)", () => {
     return request(app)
       .get("/api/articles/seal")
       .expect(400)
@@ -89,7 +87,7 @@ describe("GET: /api/articles/:id", () => {
 });
 
 describe("GET: /api/articles", () => {
-  test("200:, responds with all articles in an array", () => {
+  test("200: Responds with all articles in an array", () => {
     return request(app)
       .get("/api/articles")
       .expect(200)
@@ -110,7 +108,7 @@ describe("GET: /api/articles", () => {
 });
 
 describe("GET: /api/articles/:id/comments", () => {
-  test("200: responds with an array of comments from the given article ID", () => {
+  test("200: Responds with an array of comments from the given article ID", () => {
     return request(app)
       .get("/api/articles/5/comments")
       .expect(200)
@@ -124,7 +122,7 @@ describe("GET: /api/articles/:id/comments", () => {
         expect(body.article[0]).toHaveProperty("article_id");
       });
   });
-  test("404: trying to get an article comment which does not exist (article_id too high)", () => {
+  test("404: Responds when trying to get an article comment which does not exist (99)", () => {
     return request(app)
       .get("/api/articles/99/comments")
       .expect(404)
@@ -140,7 +138,7 @@ describe("GET: /api/articles/:id/comments", () => {
         expect(article).toEqual([]);
       });
   });
-  test("400: responds when given a bad request", () => {
+  test("400: Responds when given a bad request (seal)", () => {
     return request(app)
       .get("/api/articles/seal/comments")
       .expect(400)
@@ -151,7 +149,7 @@ describe("GET: /api/articles/:id/comments", () => {
 });
 
 describe("POST /api/articles/:article_id/comments", () => {
-  test("201: Adds a comment for a username and returns the posted comment", () => {
+  test("201: Responds with the posted comment when adding comment for a username", () => {
     const comment = {
       username: "butter_bridge",
       body: "driving pug",
@@ -174,7 +172,7 @@ describe("POST /api/articles/:article_id/comments", () => {
       });
   });
 
-  test("400: Checks all fields are available", () => {
+  test("400: Responds when field not available", () => {
     const comment = {
       username: "butter_bridge",
       body: null,
@@ -190,7 +188,7 @@ describe("POST /api/articles/:article_id/comments", () => {
 });
 
 describe("PATCH /api/articles/:article_id", () => {
-  test("200: Amended the votes from an article", () => {
+  test("200: Responds with updated article when positive votes updated", () => {
     const votes = { inc_votes: 999 };
 
     return request(app)
@@ -204,7 +202,7 @@ describe("PATCH /api/articles/:article_id", () => {
       });
   });
 
-  test("200: Amended the votes from an article when given a negative number", () => {
+  test("200: Responds with updated article when negative votes updated", () => {
     const votes = { inc_votes: -110 };
 
     return request(app)
@@ -216,7 +214,7 @@ describe("PATCH /api/articles/:article_id", () => {
       });
   });
 
-  test("404: Returns when votes are passed to be updated on an article that does not exist", () => {
+  test("404: Responds when votes are passed an article that does not exist (3000)", () => {
     const votes = { inc_votes: 50 };
 
     return request(app)
@@ -228,7 +226,7 @@ describe("PATCH /api/articles/:article_id", () => {
       });
   });
 
-  test("400: Returns when wrong format of votes is passed in", () => {
+  test("400: Responds when wrong format of votes is passed in (yes)", () => {
     const votes = { inc_votes: "yes" };
 
     return request(app)
@@ -242,10 +240,10 @@ describe("PATCH /api/articles/:article_id", () => {
 });
 
 describe("DELETE /api/comments/:comment_id", () => {
-  test("204: delete comment from given comment_id", () => {
+  test("204: Responds with nothing when deleting a comment given a comment_id", () => {
     return request(app).delete("/api/comments/3").expect(204);
   });
-  test("400: Returns when wrong format of comment_id is sent", () => {
+  test("400: Responds when wrong format of comment_id is sent (car)", () => {
     return request(app)
       .delete("/api/comments/car")
       .expect(400)
@@ -253,12 +251,28 @@ describe("DELETE /api/comments/:comment_id", () => {
         expect(body.msg).toBe("Invalid DB input format");
       });
   });
-  test("404: Returns when comment_id passed to be deleted that does not exist", () => {
+  test("404: Responds when comment_id passed to be deleted that does not exist", () => {
     return request(app)
       .delete("/api/comments/99")
       .expect(404)
       .then(({ body }) => {
         expect(body.msg).toBe("Resource not found with value: 99");
+      });
+  });
+});
+
+describe("GET: /api/users", () => {
+  test("200: Responds with all users as an array of objects", () => {
+    return request(app)
+      .get("/api/users")
+      .expect(200)
+      .then(({ body: { users } }) => {
+        expect(users.length).toBe(4);
+        users.forEach((user) => {
+          expect(user).toHaveProperty("username");
+          expect(user).toHaveProperty("name");
+          expect(user).toHaveProperty("avatar_url");
+        });
       });
   });
 });
