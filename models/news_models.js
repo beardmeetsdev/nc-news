@@ -17,7 +17,13 @@ const selectArticleById = (id) => {
     });
 };
 
-const selectArticles = () => {
+const selectArticles = (sort_by, order) => {
+  if (!order) {
+    order = "DESC";
+  }
+  if (!sort_by) {
+    sort_by = "created_at";
+  }
   return db
     .query(
       `SELECT articles.author, articles.title, articles.article_id, articles.topic, articles.created_at, articles.votes, articles.article_img_url, 
@@ -25,7 +31,7 @@ const selectArticles = () => {
         FROM articles  
         LEFT JOIN comments ON articles.article_id = comments.article_id
         GROUP BY articles.article_id
-        ORDER BY articles.created_at DESC`
+        ORDER BY articles.${sort_by} ${order}`
     )
     .then(({ rows }) => {
       return rows;

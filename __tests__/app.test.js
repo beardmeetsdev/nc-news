@@ -93,6 +93,7 @@ describe("GET: /api/articles", () => {
       .expect(200)
       .then(({ body: { articles } }) => {
         expect(articles.length).toBe(13);
+        expect(articles[0].article_id).toBe(3);
         articles.forEach((article) => {
           expect(typeof article.author).toBe("string");
           expect(typeof article.title).toBe("string");
@@ -103,6 +104,30 @@ describe("GET: /api/articles", () => {
           expect(typeof article.article_img_url).toBe("string");
           expect(typeof article.comment_count).toBe("number");
         });
+      });
+  });
+  test("200: Responds with all articles in an array sorted by column (title) and order ASC", () => {
+    return request(app)
+      .get("/api/articles?sort_by=title&order=asc")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(articles[0].title).toBe("A");
+      });
+  });
+  test("200: Responds with all articles in an array sorted by column (title) and order DESC", () => {
+    return request(app)
+      .get("/api/articles?sort_by=title&order=desc")
+      .expect(200)
+      .then(({ body: { articles } }) => {
+        expect(articles[0].title).toBe("Z");
+      });
+  });
+  test("400: Responds when given a bad request when ordered by non-table column", () => {
+    return request(app)
+      .get("/api/articles?sort_by=genre&order=desc")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Table column does not exist");
       });
   });
 });
