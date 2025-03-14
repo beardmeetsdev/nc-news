@@ -379,6 +379,7 @@ describe("seed", () => {
                           AND column_name = 'votes';`
         )
         .then(({ rows: [column] }) => {
+          console.log(column);
           expect(column.column_name).toBe("votes");
           expect(column.data_type).toBe("integer");
         });
