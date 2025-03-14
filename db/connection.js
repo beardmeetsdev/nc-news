@@ -17,5 +17,4 @@ if (ENV === "production") {
   config.max = 2;
 }
 
-const db = new Pool(config);
-module.exports = db;
+module.exports = new Pool(config);
