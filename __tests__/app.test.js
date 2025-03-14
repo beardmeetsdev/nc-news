@@ -7,6 +7,8 @@ const db = require("../db/connection");
 const seed = require("../db/seeds/seed");
 const data = require("../db/data/test-data");
 
+const toBeSortedBy = require("jest-sorted");
+
 beforeEach(() => {
   return seed(data);
 });
@@ -81,7 +83,15 @@ describe("GET: /api/articles/:id", () => {
       .get("/api/articles/seal")
       .expect(400)
       .then(({ body }) => {
-        expect(body.msg).toBe("Invalid DB input format");
+        expect(body.msg).toBe("bad request");
+      });
+  });
+  test("200: Responds with a single article including the number of comments made on that article", () => {
+    return request(app)
+      .get("/api/articles/1")
+      .expect(200)
+      .then(({ body }) => {
+        expect(body.comment_count).toBe(11);
       });
   });
 });
@@ -111,7 +121,7 @@ describe("GET: /api/articles", () => {
       .get("/api/articles?sort_by=title&order=asc")
       .expect(200)
       .then(({ body: { articles } }) => {
-        expect(articles[0].title).toBe("A");
+        expect(articles).toBeSortedBy("title");
       });
   });
   test("200: Responds with all articles in an array sorted by column (title) and order DESC", () => {
@@ -119,7 +129,9 @@ describe("GET: /api/articles", () => {
       .get("/api/articles?sort_by=title&order=desc")
       .expect(200)
       .then(({ body: { articles } }) => {
-        expect(articles[0].title).toBe("Z");
+        expect(articles).toBeSortedBy("title", {
+          descending: true,
+        });
       });
   });
   test("400: Responds when given a bad request when ordered by non-table column", () => {
@@ -130,6 +142,14 @@ describe("GET: /api/articles", () => {
         expect(body.msg).toBe("Table column does not exist");
       });
   });
+  test("400: Responds when given a bad request when ordered by non-table column", () => {
+    return request(app)
+      .get("/api/articles?sort_by=title&order=katherine")
+      .expect(400)
+      .then(({ body }) => {
+        expect(body.msg).toBe("Bad 'sort' arguement");
+      });
+  });
   test("200: Responds with all articles for a given topic", () => {
     return request(app)
       .get("/api/articles?topic=mitch")
@@ -138,6 +158,14 @@ describe("GET: /api/articles", () => {
         expect(articles.length).toBe(12);
       });
   });
+  // test.only("200: Responds with an empty array when no topic has no articles", () => {
+  //   return request(app)
+  //     .get("/api/articles?topic=paper")
+  //     .expect(200)
+  //     .then(({ body: { articles } }) => {
+  //       expect(articles).toBeNull();
+  //     });
+  // });
   test("404: Responds when trying to get articles for a topic which does not exist (stephen)", () => {
     return request(app)
       .get("/api/articles?topic=stephen")
@@ -192,7 +220,7 @@ describe("GET: /api/articles/:id/comments", () => {
       .get("/api/articles/seal/comments")
       .expect(400)
       .then(({ body }) => {
-        expect(body.msg).toBe("Invalid DB input format");
+        expect(body.msg).toBe("bad request");
       });
   });
 });
@@ -283,7 +311,7 @@ describe("PATCH /api/articles/:article_id", () => {
       .send(votes)
       .expect(400)
       .then(({ body }) => {
-        expect(body.msg).toBe("Invalid DB input format");
+        expect(body.msg).toBe("bad request");
       });
   });
 });
@@ -297,7 +325,7 @@ describe("DELETE /api/comments/:comment_id", () => {
       .delete("/api/comments/car")
       .expect(400)
       .then(({ body }) => {
-        expect(body.msg).toBe("Invalid DB input format");
+        expect(body.msg).toBe("bad request");
       });
   });
   test("404: Responds when comment_id passed to be deleted that does not exist", () => {

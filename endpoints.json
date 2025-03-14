@@ -27,7 +27,7 @@
     }
   },
   "GET /api/articles/article_id": {
-    "description": "serves an object with the article from given ID",
+    "description": "serves an object with the article from given ID, returns article with number of comments",
     "queries": [],
     "exampleResponse": {
       "article_id": 4,
