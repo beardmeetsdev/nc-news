@@ -1,5 +1,6 @@
 const express = require("express");
 const app = express();
+const cors = require("cors");
 
 const {
   getApi,
@@ -13,6 +14,7 @@ const {
   getUsers,
 } = require("./controllers/news_controllers");
 
+app.use(cors());
 app.use(express.json());
 app.get("/", (req, res) => {
   res.send("Hello World!");
