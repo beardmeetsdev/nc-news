@@ -42,7 +42,7 @@ const selectArticles = (sort_by, order, topic) => {
       queryStr += ` WHERE articles.topic = $1`;
       return db
         .query(
-          `${queryStr} GROUP BY articles.article_id ORDER BY articles.${sort_by} ${order}`,
+          `${queryStr} GROUP BY articles.article_id ORDER BY ${sort_by} ${order}`,
           queryValues
         )
         .then(({ rows }) => {
@@ -53,7 +53,7 @@ const selectArticles = (sort_by, order, topic) => {
 
   return db
     .query(
-      `${queryStr} GROUP BY articles.article_id ORDER BY articles.${sort_by} ${order}`,
+      `${queryStr} GROUP BY articles.article_id ORDER BY ${sort_by} ${order}`,
       queryValues
     )
     .then(({ rows }) => {
